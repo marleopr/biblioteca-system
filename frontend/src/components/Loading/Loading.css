@@ -1,0 +1,306 @@
+/* From Uiverse.io by Nawsome */
+.loader {
+  --background: linear-gradient(135deg, #23C4F8, #275EFE);
+  --shadow: rgba(39, 94, 254, 0.28);
+  --text: #6C7486;
+  --page: rgba(255, 255, 255, 0.36);
+  --page-fold: rgba(255, 255, 255, 0.52);
+  --duration: 3s;
+  width: 200px;
+  height: 140px;
+  position: relative;
+  overflow: visible;
+}
+
+.loader-small {
+  width: 100px;
+  height: 70px;
+  overflow: visible;
+  margin: 0 auto;
+  position: relative;
+}
+
+.loader-small > div {
+  width: 100%;
+  height: 100%;
+  border-radius: 6.5px;
+  perspective: 300px;
+  box-shadow: 0 2px 3px var(--shadow);
+  overflow: visible;
+}
+
+.loader-small > div > ul {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.loader-small > div > ul > li {
+  top: 5px;
+  left: 5px;
+}
+
+.loader-small > div > ul > li svg {
+  width: 45px;
+  height: 60px;
+}
+
+.loader-small:before,
+.loader-small:after {
+  width: 60px;
+  bottom: 4px;
+  box-shadow: 0 8px 6px var(--shadow);
+  height: auto;
+  z-index: 0;
+}
+
+.loader-small:before {
+  left: 2px;
+}
+
+.loader-small:after {
+  right: 2px;
+}
+
+.loader-small > span {
+  font-size: 12px;
+  margin-top: 10px;
+  position: relative;
+  z-index: 10;
+  display: block;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.loader-medium {
+  width: 150px;
+  height: 105px;
+}
+
+.loader-medium > div {
+  width: 100%;
+  height: 100%;
+  border-radius: 9.75px;
+  perspective: 450px;
+  box-shadow: 0 3px 4.5px var(--shadow);
+}
+
+.loader-medium > div > ul {
+  width: 100%;
+  height: 100%;
+}
+
+.loader-medium > div > ul > li {
+  top: 7.5px;
+  left: 7.5px;
+}
+
+.loader-medium > div > ul > li svg {
+  width: 67.5px;
+  height: 90px;
+}
+
+.loader-medium:before,
+.loader-medium:after {
+  width: 90px;
+  bottom: 6px;
+  box-shadow: 0 12px 9px var(--shadow);
+}
+
+.loader-medium:before {
+  left: 3px;
+}
+
+.loader-medium:after {
+  right: 3px;
+}
+
+.loader-medium > span {
+  font-size: 14px;
+  margin-top: 15px;
+}
+
+.loader:before,
+.loader:after {
+  --r: -6deg;
+  content: "";
+  position: absolute;
+  bottom: 8px;
+  width: 120px;
+  top: 80%;
+  box-shadow: 0 16px 12px var(--shadow);
+  transform: rotate(var(--r));
+}
+
+.loader:before {
+  left: 4px;
+}
+
+.loader:after {
+  --r: 6deg;
+  right: 4px;
+}
+
+.loader > div {
+  width: 100%;
+  height: 100%;
+  border-radius: 13px;
+  position: relative;
+  z-index: 1;
+  perspective: 600px;
+  box-shadow: 0 4px 6px var(--shadow);
+  background-image: var(--background);
+}
+
+.loader > div > ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: relative;
+  overflow: visible;
+}
+
+.loader > div > ul > li {
+  --r: 180deg;
+  --o: 0;
+  --c: var(--page);
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  transform-origin: 100% 50%;
+  color: var(--c);
+  opacity: var(--o);
+  transform: rotateY(var(--r));
+  animation: var(--duration) ease infinite;
+}
+
+.loader > div > ul > li:nth-child(2) {
+  --c: var(--page-fold);
+  animation-name: page-2;
+}
+
+.loader > div > ul > li:nth-child(3) {
+  --c: var(--page-fold);
+  animation-name: page-3;
+}
+
+.loader > div > ul > li:nth-child(4) {
+  --c: var(--page-fold);
+  animation-name: page-4;
+}
+
+.loader > div > ul > li:nth-child(5) {
+  --c: var(--page-fold);
+  animation-name: page-5;
+}
+
+.loader > div > ul > li svg {
+  width: 90px;
+  height: 120px;
+  display: block;
+}
+
+.loader > div > ul > li:first-child {
+  --r: 0deg;
+  --o: 1;
+}
+
+.loader > div > ul > li:last-child {
+  --o: 1;
+}
+
+.loader > span {
+  display: block;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 20px;
+  text-align: center;
+  color: var(--text);
+}
+
+@keyframes page-2 {
+  0% {
+    transform: rotateY(180deg);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  35%,
+  100% {
+    opacity: 0;
+  }
+
+  50%,
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes page-3 {
+  15% {
+    transform: rotateY(180deg);
+    opacity: 0;
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
+
+  65%,
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes page-4 {
+  30% {
+    transform: rotateY(180deg);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  65%,
+  100% {
+    opacity: 0;
+  }
+
+  80%,
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes page-5 {
+  45% {
+    transform: rotateY(180deg);
+    opacity: 0;
+  }
+
+  65% {
+    opacity: 1;
+  }
+
+  80%,
+  100% {
+    opacity: 0;
+  }
+
+  95%,
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
