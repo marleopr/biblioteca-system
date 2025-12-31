@@ -136,12 +136,12 @@ export const Settings = () => {
         isClosable: true,
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: 'Erro',
-        description: 'Não foi possível excluir o usuário.',
+        description: error.response?.data?.error || 'Não foi possível excluir o usuário.',
         status: 'error',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
     },

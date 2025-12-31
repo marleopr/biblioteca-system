@@ -30,7 +30,15 @@ export const updateUserSchema = z.object({
     name: z.string().min(1).optional(),
     phone: z.string().min(1).optional(),
     address: z.string().min(1).optional(),
+    email: z
+      .string()
+      .refine((email) => !email || validateEmail(email), {
+        message: 'Invalid email format',
+      })
+      .nullable()
+      .optional(),
     photo: z.string().nullable().optional(),
+    role: z.enum(['ADMIN', 'USER']).optional(),
     password: z.string().min(6).optional(),
   }),
   params: z.object({

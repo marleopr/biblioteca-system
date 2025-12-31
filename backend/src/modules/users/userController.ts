@@ -62,14 +62,18 @@ export const userController = {
     res.status(204).send();
   },
 
-  delete: (req: AuthRequest, res: Response): void => {
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
+  delete: (req: AuthRequest, res: Response, next: NextFunction): void => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      const { id } = req.params;
+      userService.delete(id, req.user.userId);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
     }
-    const { id } = req.params;
-    userService.delete(id, req.user.userId);
-    res.status(204).send();
   },
 
   getProfile: (req: AuthRequest, res: Response): void => {

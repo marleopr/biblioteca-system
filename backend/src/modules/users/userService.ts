@@ -4,6 +4,7 @@ import { userRepository } from './userRepository';
 import { AppError } from '../../shared/errors/AppError';
 import { CreateUserDTO, UpdateUserDTO, UpdateProfileDTO } from './userDTO';
 import { createLog } from '../logs/logService';
+import db from '../../config/database';
 
 export const userService = {
   findAll: () => {
@@ -13,7 +14,7 @@ export const userService = {
   findById: (id: string) => {
     const user = userRepository.findById(id);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('Usuário não encontrado', 404);
     }
     return user;
   },
@@ -21,7 +22,7 @@ export const userService = {
   create: async (data: CreateUserDTO, loggedUserId: string) => {
     const existingUser = userRepository.findByCpf(data.cpf);
     if (existingUser) {
-      throw new AppError('CPF already registered', 400);
+      throw new AppError('CPF já cadastrado', 400);
     }
 
     const passwordHash = await bcrypt.hash(data.password, 10);
@@ -49,7 +50,7 @@ export const userService = {
   update: async (id: string, data: UpdateUserDTO, loggedUserId: string) => {
     const user = userRepository.findById(id);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('Usuário não encontrado', 404);
     }
 
     const updateData: Partial<typeof user> = { ...data };
@@ -73,7 +74,7 @@ export const userService = {
   activate: (id: string, loggedUserId: string) => {
     const user = userRepository.findById(id);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('Usuário não encontrado', 404);
     }
 
     userRepository.activate(id);
@@ -83,7 +84,7 @@ export const userService = {
   deactivate: (id: string, loggedUserId: string) => {
     const user = userRepository.findById(id);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('Usuário não encontrado', 404);
     }
 
     userRepository.deactivate(id);
@@ -93,17 +94,32 @@ export const userService = {
   delete: (id: string, loggedUserId: string) => {
     const user = userRepository.findById(id);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('Usuário não encontrado', 404);
     }
 
-    userRepository.delete(id);
+    // Impedir que o usuário delete a própria conta
+    if (id === loggedUserId) {
+      throw new AppError('Você não pode deletar sua própria conta. Peça a outro administrador para fazer isso.', 400);
+    }
+
+    // Verificar se há logs relacionados
+    const logsCount = db.prepare('SELECT COUNT(*) as count FROM logs WHERE user_id = ?').get(id) as { count: number };
+    
+    if (logsCount.count > 0) {
+      // Deletar logs relacionados antes de deletar o usuário
+      db.prepare('DELETE FROM logs WHERE user_id = ?').run(id);
+    }
+
+    // Criar log ANTES de deletar o usuário (para evitar erro de foreign key)
     createLog(loggedUserId, `DELETE_USER_PERMANENT:${id}`);
+    
+    userRepository.delete(id);
   },
 
   updateProfile: async (id: string, data: UpdateProfileDTO, userRole: string) => {
     const user = userRepository.findById(id);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('Usuário não encontrado', 404);
     }
 
     const updateData: Partial<typeof user> = { ...data };
@@ -111,13 +127,13 @@ export const userService = {
     // Só permite alterar CPF se for ADMIN
     if (data.cpf) {
       if (userRole !== 'ADMIN') {
-        throw new AppError('Only ADMIN can change CPF', 403);
+        throw new AppError('Apenas ADMIN pode alterar o CPF', 403);
       }
       
       // Verificar se o CPF já está em uso por outro usuário
       const existingUser = userRepository.findByCpf(data.cpf);
       if (existingUser && existingUser.id !== id) {
-        throw new AppError('CPF already registered', 400);
+        throw new AppError('CPF já cadastrado', 400);
       }
       
       updateData.cpf = data.cpf;
@@ -135,7 +151,7 @@ export const userService = {
 
     const updatedUser = userRepository.findById(id);
     if (!updatedUser) {
-      throw new AppError('User not found', 404);
+      throw new AppError('Usuário não encontrado', 404);
     }
 
     const { password_hash, ...userWithoutPassword } = updatedUser;

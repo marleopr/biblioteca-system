@@ -15,6 +15,7 @@ import { Button } from '../../components/Button/Button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
+import { formatCPF } from '../../utils/validation';
 
 export const Login = () => {
   const [cpf, setCpf] = useState('');
@@ -31,13 +32,29 @@ export const Login = () => {
     }
   }, [user, isLoading, navigate]);
 
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permite digitar com ou sem formatação, mas formata visualmente
+    const cleanCPF = value.replace(/\D/g, '');
+    if (cleanCPF.length <= 11) {
+      // Formata apenas se tiver pelo menos 3 dígitos
+      if (cleanCPF.length >= 3) {
+        setCpf(formatCPF(cleanCPF));
+      } else {
+        setCpf(cleanCPF);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const response = await authService.login(cpf, password);
+      // Remove formatação antes de enviar ao backend
+      const cleanCpf = cpf.replace(/\D/g, '');
+      const response = await authService.login(cleanCpf, password);
       login(response.token, response.user);
       navigate('/');
     } catch (err) {
@@ -73,7 +90,9 @@ export const Login = () => {
                 <Input
                   type="text"
                   value={cpf}
-                  onChange={(e) => setCpf(e.target.value)}
+                  onChange={handleCpfChange}
+                  placeholder="000.000.000-00"
+                  maxLength={14}
                   required
                 />
               </FormControl>

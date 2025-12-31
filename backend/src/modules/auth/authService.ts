@@ -6,9 +6,13 @@ import { LoginDTO } from './authDTO';
 import { createLog } from '../logs/logService';
 
 export const login = async (data: LoginDTO) => {
+  // Remove formatação do CPF (pontos e traços) antes de buscar no banco
+  // O banco armazena CPF apenas com números
+  const cleanCpf = data.cpf.replace(/\D/g, '');
+  
   const user = db
     .prepare('SELECT * FROM users WHERE cpf = ? AND active = 1')
-    .get(data.cpf) as {
+    .get(cleanCpf) as {
     id: string;
     name: string;
     cpf: string;

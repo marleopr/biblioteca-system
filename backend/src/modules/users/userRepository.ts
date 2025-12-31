@@ -61,6 +61,10 @@ export const userRepository = {
       fields.push('photo = ?');
       values.push(data.photo);
     }
+    if (data.role !== undefined) {
+      fields.push('role = ?');
+      values.push(data.role);
+    }
     if (data.password_hash !== undefined) {
       fields.push('password_hash = ?');
       values.push(data.password_hash);
