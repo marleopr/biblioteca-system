@@ -4,6 +4,40 @@
 
 Este é o manual de uso do Sistema de Gestão de Biblioteca. Este documento explica como usar o sistema de forma simples e prática.
 
+## 📦 Como Instalar o Sistema em um Novo Computador
+
+### O Que Você Precisa
+
+Para instalar o sistema em outro computador, você precisa copiar a **pasta completa** `pkg` que contém:
+
+- ✅ `biblioteca-system.exe` - O programa principal
+- ✅ `executar.bat` - Script para iniciar facilmente
+- ✅ `frontend/` - Interface do sistema (pasta completa)
+- ✅ `backups/` - Pasta para backups (pode estar vazia)
+
+### Passo a Passo
+
+1. **Copie a pasta `pkg` completa** para o computador onde quer instalar
+   - Pode ser em qualquer lugar (Área de Trabalho, Documentos, etc.)
+   - Não precisa de instalação especial, apenas copiar a pasta
+
+2. **Na primeira execução:**
+   - Clique duas vezes no arquivo `executar.bat`
+   - O sistema criará automaticamente o banco de dados (`database.sqlite`)
+   - Aguarde aparecer "Server running on port 3001"
+
+3. **Acesse o sistema:**
+   - Abra seu navegador (Chrome, Firefox ou Edge)
+   - Digite: `http://localhost:3001`
+   - Faça login com as credenciais padrão (veja abaixo)
+
+### ⚠️ Importante
+
+- **Não precisa instalar nada** - O sistema funciona sozinho
+- **Não precisa de internet** - Funciona completamente offline
+- **Todos os dados ficam na pasta** - O arquivo `database.sqlite` contém todos os dados
+- **Faça backup regularmente** - Copie a pasta `backups/` para um local seguro
+
 ## 🚀 Como Iniciar o Sistema
 
 ### Primeira Vez

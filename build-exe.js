@@ -94,6 +94,39 @@ if (fs.existsSync(exeDir)) {
   
   copyRecursiveSync(backendFrontendDist, exeFrontendDist);
   console.log('✅ Frontend copiado para pasta do executável!\n');
+  
+  // 5.1. Copiar node_modules nativos necessários (bcrypt e better-sqlite3)
+  console.log('📋 Copiando módulos nativos (bcrypt, better-sqlite3)...');
+  const backendNodeModules = path.join(__dirname, 'backend', 'node_modules');
+  const exeNodeModules = path.join(exeDir, 'node_modules');
+  
+  if (!fs.existsSync(exeNodeModules)) {
+    fs.mkdirSync(exeNodeModules, { recursive: true });
+  }
+  
+  // Copiar bcrypt
+  const bcryptSrc = path.join(backendNodeModules, 'bcrypt');
+  const bcryptDest = path.join(exeNodeModules, 'bcrypt');
+  if (fs.existsSync(bcryptSrc)) {
+    if (fs.existsSync(bcryptDest)) {
+      fs.rmSync(bcryptDest, { recursive: true, force: true });
+    }
+    copyRecursiveSync(bcryptSrc, bcryptDest);
+    console.log('✅ bcrypt copiado!');
+  }
+  
+  // Copiar better-sqlite3
+  const betterSqlite3Src = path.join(backendNodeModules, 'better-sqlite3');
+  const betterSqlite3Dest = path.join(exeNodeModules, 'better-sqlite3');
+  if (fs.existsSync(betterSqlite3Src)) {
+    if (fs.existsSync(betterSqlite3Dest)) {
+      fs.rmSync(betterSqlite3Dest, { recursive: true, force: true });
+    }
+    copyRecursiveSync(betterSqlite3Src, betterSqlite3Dest);
+    console.log('✅ better-sqlite3 copiado!');
+  }
+  
+  console.log('✅ Módulos nativos copiados!\n');
 }
 
 console.log('🎉 Build completo!');

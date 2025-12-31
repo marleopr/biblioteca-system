@@ -48,7 +48,9 @@
       "dist/**/*.js"
     ],
     "assets": [
-      "frontend/dist/**/*"
+      "frontend/dist/**/*",
+      "node_modules/bcrypt/lib/binding/**/*",
+      "node_modules/better-sqlite3/**/*.node"
     ],
     "targets": [
       "node18-win-x64"
