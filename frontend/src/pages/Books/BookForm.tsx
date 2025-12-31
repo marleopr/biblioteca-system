@@ -71,7 +71,7 @@ export const BookForm = ({ book, onClose, onSuccess }: BookFormProps) => {
       setTitle(book.title);
       setAuthorId(book.author_id);
       setCategoryId(book.category_id);
-      setOrigin(book.origin);
+      setOrigin(book.origin || '');
       setCover(book.photo || null);
       setAcquisitionType(book.acquisition_type);
       setTotalQuantity(book.total_quantity);
@@ -262,30 +262,19 @@ export const BookForm = ({ book, onClose, onSuccess }: BookFormProps) => {
       return;
     }
     
-    if (!origin.trim()) {
-      toast({
-        title: 'Erro',
-        description: 'A origem é obrigatória.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-    
     const data = {
       title,
       author_id: authorId,
       category_id: categoryId,
-      origin,
+      origin: (origin || '').trim() || null,
       photo: cover || null,
       acquisition_type: acquisitionType,
       total_quantity: totalQuantity,
-      barcode: barcode.trim() || null,
-      inventory_number: inventoryNumber.trim() || null,
-      edition: edition.trim() || null,
+      barcode: (barcode || '').trim() || null,
+      inventory_number: (inventoryNumber || '').trim() || null,
+      edition: (edition || '').trim() || null,
       cover_type: coverType || null,
-      isbn: isbn.trim() || null,
+      isbn: (isbn || '').trim() || null,
     };
 
     if (book) {
@@ -432,16 +421,27 @@ export const BookForm = ({ book, onClose, onSuccess }: BookFormProps) => {
               />
             </FormControl>
 
-            <FormControl isRequired>
+            <FormControl>
               <FormLabel>Origem</FormLabel>
-              <Input value={origin} onChange={(e) => setOrigin(e.target.value)} />
+              <Input 
+                value={origin} 
+                onChange={(e) => setOrigin(e.target.value)} 
+                placeholder="Opcional"
+              />
             </FormControl>
 
-            <FormControl isRequired>
+            <FormControl>
               <FormLabel>Tipo de Aquisição</FormLabel>
               <Select
                 value={acquisitionType}
-                onChange={(e) => setAcquisitionType(e.target.value as 'DONATION' | 'PURCHASE')}
+                onChange={(e) => {
+                  const value = e.target.value as 'DONATION' | 'PURCHASE';
+                  if (value === 'DONATION' || value === 'PURCHASE') {
+                    setAcquisitionType(value);
+                  }
+                }}
+                size="md"
+                isDisabled={false}
               >
                 <option value="DONATION">Doação</option>
                 <option value="PURCHASE">Compra</option>

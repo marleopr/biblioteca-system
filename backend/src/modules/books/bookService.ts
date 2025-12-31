@@ -113,7 +113,7 @@ export const bookService = {
       author_id: data.author_id,
       category_id: data.category_id,
       photo: data.photo || null,
-      origin: data.origin,
+      origin: data.origin || null,
       acquisition_type: data.acquisition_type,
       total_quantity: data.total_quantity,
       available_quantity: data.total_quantity,

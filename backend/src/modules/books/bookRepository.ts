@@ -84,7 +84,7 @@ export const bookRepository = {
       book.author_id,
       book.category_id,
       book.photo || null,
-      book.origin,
+      book.origin || null,
       book.acquisition_type,
       book.total_quantity,
       book.available_quantity,
@@ -119,7 +119,7 @@ export const bookRepository = {
     }
     if (data.origin !== undefined) {
       fields.push('origin = ?');
-      values.push(data.origin);
+      values.push(data.origin || null);
     }
     if (data.acquisition_type !== undefined) {
       fields.push('acquisition_type = ?');

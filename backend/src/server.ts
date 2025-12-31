@@ -19,6 +19,7 @@ import { up as fixUniqueIndexes } from './database/migrations/010_fix_unique_ind
 import { up as addBookFields } from './database/migrations/011_add_book_fields';
 import { up as addAddressFields } from './database/migrations/013_add_address_fields';
 import { up as makeAddressOptional } from './database/migrations/014_make_address_optional';
+import { up as makeOriginOptional } from './database/migrations/015_make_origin_optional';
 // import { up as seedTestData } from './database/migrations/012_seed_test_data';
 import { createStartupBackup } from './modules/backup/backupScheduler';
 
@@ -84,6 +85,11 @@ try {
   }
   try {
     makeAddressOptional();
+  } catch (error) {
+    // Ignore error if migration fails
+  }
+  try {
+    makeOriginOptional();
   } catch (error) {
     // Ignore error if migration fails
   }

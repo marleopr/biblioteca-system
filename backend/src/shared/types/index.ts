@@ -56,7 +56,7 @@ export interface Book {
   author_id: string;
   category_id: string;
   photo: string | null;
-  origin: string;
+  origin: string | null;
   acquisition_type: AcquisitionType;
   total_quantity: number;
   available_quantity: number;
