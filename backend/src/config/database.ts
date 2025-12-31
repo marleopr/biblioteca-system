@@ -4,8 +4,8 @@ import fs from 'fs';
 import { getBasePath } from '../shared/utils/paths';
 
 // Obter o caminho do banco de forma segura
-// Quando empacotado, sempre usar process.cwd() (diretório de trabalho atual)
-function getDatabasePath(): string {
+// Quando empacotado, sempre usar o diretório do executável
+export function getDatabasePath(): string {
   // Detectar se está empacotado verificando se __dirname contém "snapshot"
   // ou se process.pkg existe (propriedade definida pelo pkg)
   const isPackaged = 
@@ -15,9 +15,10 @@ function getDatabasePath(): string {
   
   let basePath: string;
   if (isPackaged) {
-    // Quando empacotado, SEMPRE usar process.cwd()
-    // O script .bat garante que estamos no diretório correto
-    basePath = process.cwd();
+    // Quando empacotado, usar o diretório do executável
+    // Isso garante que o banco sempre será criado no mesmo lugar,
+    // independentemente de onde o .exe foi executado
+    basePath = path.dirname(process.execPath);
   } else {
     // Em desenvolvimento, usar getBasePath()
     basePath = getBasePath();
@@ -30,6 +31,25 @@ function getDatabasePath(): string {
 
 const dbPath = getDatabasePath();
 const dbDir = path.dirname(dbPath);
+
+// Log do caminho do banco para debug (apenas quando empacotado)
+const isPackaged = 
+  typeof (process as any).pkg !== 'undefined' ||
+  __dirname.includes('snapshot') ||
+  process.execPath.includes('snapshot');
+if (isPackaged) {
+  console.log(`\n📁 Informações do banco de dados:`);
+  console.log(`   Caminho do executável: ${process.execPath}`);
+  console.log(`   Diretório do executável: ${path.dirname(process.execPath)}`);
+  console.log(`   Caminho do banco: ${dbPath}`);
+  console.log(`   Arquivo existe: ${fs.existsSync(dbPath)}`);
+  if (fs.existsSync(dbPath)) {
+    const stats = fs.statSync(dbPath);
+    console.log(`   Tamanho do banco: ${stats.size} bytes`);
+    console.log(`   Modificado em: ${stats.mtime.toISOString()}`);
+  }
+  console.log(``);
+}
 
 // Garantir que o diretório existe
 if (!fs.existsSync(dbDir)) {
@@ -53,38 +73,74 @@ try {
   throw new Error(`Sem permissão de escrita em: ${dbDir}`);
 }
 
-// Verificar e limpar arquivos WAL/SHM se existirem (podem causar problemas)
+// Verificar arquivos WAL/SHM
+// IMPORTANTE: Não deletar automaticamente - apenas verificar se o banco está em uso
+// Se o banco estiver em uso, os arquivos WAL/SHM são normais e não devem ser deletados
 const walPath = `${dbPath}-wal`;
 const shmPath = `${dbPath}-shm`;
-if (fs.existsSync(walPath)) {
-  try {
-    fs.unlinkSync(walPath);
-  } catch (e) {
-    // Ignorar
-  }
-}
-if (fs.existsSync(shmPath)) {
-  try {
-    fs.unlinkSync(shmPath);
-  } catch (e) {
-    // Ignorar
-  }
+const hasWal = fs.existsSync(walPath);
+const hasShm = fs.existsSync(shmPath);
+
+if (isPackaged && (hasWal || hasShm)) {
+  console.log(`⚠️  Arquivos WAL/SHM detectados - banco pode estar em uso ou não foi fechado corretamente`);
+  console.log(`   WAL: ${hasWal ? 'existe' : 'não existe'}, SHM: ${hasShm ? 'existe' : 'não existe'}`);
+  // Não deletar - deixar o SQLite gerenciar
 }
 
 // Verificar se o arquivo existe e está corrompido
 let db: DatabaseType | null = null;
 try {
-  db = new Database(dbPath);
-  
-  // Tentar executar uma query simples para verificar se está corrompido
-  db.prepare('SELECT 1').get();
-  
-  // Habilitar foreign keys
-  db.pragma('foreign_keys = ON');
-  
-  // Otimizações
-  db.pragma('journal_mode = WAL');
-  db.pragma('synchronous = NORMAL');
+  // Verificar se o arquivo existe antes de tentar abrir
+  if (!fs.existsSync(dbPath)) {
+    if (isPackaged) {
+      console.log(`📝 Banco de dados não existe, criando novo...`);
+    }
+    // Criar novo banco
+    db = new Database(dbPath);
+    db.pragma('foreign_keys = ON');
+    db.pragma('journal_mode = WAL');
+    db.pragma('synchronous = NORMAL');
+    if (isPackaged) {
+      console.log(`✅ Novo banco de dados criado!`);
+    }
+  } else {
+    // Banco existe, tentar abrir
+    db = new Database(dbPath);
+    
+    // Tentar executar uma query simples para verificar se está corrompido
+    db.prepare('SELECT 1').get();
+    
+    // Verificar se há dados no banco
+    try {
+      const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+      if (isPackaged) {
+        console.log(`✅ Banco de dados aberto com sucesso! (${userCount.count} usuário(s) encontrado(s))`);
+        if (userCount.count > 0) {
+          const users = db.prepare('SELECT id, name, cpf FROM users LIMIT 5').all() as Array<{ id: string; name: string; cpf: string }>;
+          console.log(`   Usuários no banco:`);
+          users.forEach(user => {
+            console.log(`   - ${user.name} (CPF: ${user.cpf})`);
+          });
+        }
+      }
+    } catch (error: any) {
+      // Se a tabela não existir ainda, isso é normal na primeira execução
+      if (error.message?.includes('no such table')) {
+        if (isPackaged) {
+          console.log(`📝 Tabelas ainda não criadas - serão criadas pelas migrations`);
+        }
+      } else {
+        throw error;
+      }
+    }
+    
+    // Habilitar foreign keys
+    db.pragma('foreign_keys = ON');
+    
+    // Otimizações
+    db.pragma('journal_mode = WAL');
+    db.pragma('synchronous = NORMAL');
+  }
 } catch (error: any) {
   if (error.code === 'SQLITE_CORRUPT' || error.message?.includes('malformed')) {
     console.error('\n❌ ERRO: Banco de dados corrompido detectado!');

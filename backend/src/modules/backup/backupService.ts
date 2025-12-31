@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { getBasePath } from '../../shared/utils/paths';
+import { getDatabasePath } from '../../config/database';
 
 export const backupService = {
   createBackup: (): string => {
-    const basePath = getBasePath();
-    const dbPath = path.join(basePath, 'database.sqlite');
+    const dbPath = getDatabasePath();
+    const basePath = path.dirname(dbPath);
     const backupsDir = path.join(basePath, 'backups');
 
     if (!fs.existsSync(backupsDir)) {

@@ -1,11 +1,12 @@
 import { backupService } from './backupService';
 import path from 'path';
-import { getBasePath } from '../../shared/utils/paths';
+import { getDatabasePath } from '../../config/database';
 
 // Criar backup automático ao iniciar o servidor (uma vez por dia)
 export const createStartupBackup = () => {
   try {
-    const basePath = getBasePath();
+    const dbPath = getDatabasePath();
+    const basePath = path.dirname(dbPath);
     const backupsDir = path.join(basePath, 'backups');
     
     // Sempre limpar backups antigos ao iniciar (mesmo que não crie novo backup)

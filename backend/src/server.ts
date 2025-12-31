@@ -156,8 +156,10 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('unhandledRejection', (reason, _promise) => {
-  console.error('Promise rejeitada não tratada:', reason);
-  process.exit(1);
+  console.error('⚠️  Promise rejeitada não tratada:', reason);
+  console.error('Stack trace:', reason instanceof Error ? reason.stack : 'N/A');
+  // Não encerrar o servidor imediatamente - apenas logar o erro
+  // O servidor continuará rodando para não interromper outras requisições
 });
 
 // Start server
@@ -183,14 +185,36 @@ app.listen(PORT, () => {
   process.exit(1);
 });
 
+// Função para fechar o banco corretamente
+const closeDatabase = () => {
+  try {
+    console.log('\n🔄 Fechando banco de dados...');
+    db.close();
+    console.log('✅ Banco de dados fechado com sucesso!');
+  } catch (error) {
+    console.error('❌ Erro ao fechar banco de dados:', error);
+  }
+};
+
 // Graceful shutdown
 process.on('SIGINT', () => {
-  db.close();
+  closeDatabase();
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
-  db.close();
+  closeDatabase();
   process.exit(0);
+});
+
+// Garantir fechamento do banco ao encerrar (Windows)
+process.on('exit', () => {
+  try {
+    if (db && typeof db.close === 'function') {
+      db.close();
+    }
+  } catch (error) {
+    // Ignorar erros no exit
+  }
 });
 

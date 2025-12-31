@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../shared/middlewares/auth';
 import { userService } from './userService';
 
@@ -15,23 +15,31 @@ export const userController = {
     res.json(userWithoutPassword);
   },
 
-  create: async (req: AuthRequest, res: Response): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
+  create: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      const user = await userService.create(req.body, req.user.userId);
+      res.status(201).json(user);
+    } catch (error) {
+      next(error);
     }
-    const user = await userService.create(req.body, req.user.userId);
-    res.status(201).json(user);
   },
 
-  update: async (req: AuthRequest, res: Response): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
+  update: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      const { id } = req.params;
+      const user = await userService.update(id, req.body, req.user.userId);
+      res.json(user);
+    } catch (error) {
+      next(error);
     }
-    const { id } = req.params;
-    const user = await userService.update(id, req.body, req.user.userId);
-    res.json(user);
   },
 
   activate: (req: AuthRequest, res: Response): void => {
@@ -78,13 +86,17 @@ export const userController = {
     res.json(userWithoutPassword);
   },
 
-  updateProfile: async (req: AuthRequest, res: Response): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
+  updateProfile: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      const user = await userService.updateProfile(req.user.userId, req.body, req.user.role);
+      res.json(user);
+    } catch (error) {
+      next(error);
     }
-    const user = await userService.updateProfile(req.user.userId, req.body, req.user.role);
-    res.json(user);
   },
 };
 

@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { AppError } from '../../shared/errors/AppError';
 import { createLog } from '../logs/logService';
-import { getBasePath } from '../../shared/utils/paths';
+import { getDatabasePath } from '../../config/database';
 
 export const backupController = {
   create: (req: AuthRequest, res: Response): void => {
@@ -29,7 +29,8 @@ export const backupController = {
 
   list: (_req: AuthRequest, res: Response): void => {
     try {
-      const basePath = getBasePath();
+      const dbPath = getDatabasePath();
+      const basePath = path.dirname(dbPath);
       const backupsDir = path.join(basePath, 'backups');
 
       if (!fs.existsSync(backupsDir)) {
@@ -69,10 +70,10 @@ export const backupController = {
         throw new AppError('Filename is required', 400);
       }
 
-      const basePath = getBasePath();
+      const dbPath = getDatabasePath();
+      const basePath = path.dirname(dbPath);
       const backupsDir = path.join(basePath, 'backups');
       const backupPath = path.join(backupsDir, filename);
-      const dbPath = path.join(basePath, 'database.sqlite');
 
       if (!fs.existsSync(backupPath)) {
         throw new AppError('Backup file not found', 404);
@@ -165,7 +166,8 @@ export const backupController = {
         throw new AppError('Filename is required', 400);
       }
 
-      const basePath = getBasePath();
+      const dbPath = getDatabasePath();
+      const basePath = path.dirname(dbPath);
       const backupsDir = path.join(basePath, 'backups');
       const backupPath = path.join(backupsDir, filename);
 

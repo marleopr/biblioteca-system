@@ -2,7 +2,7 @@ import path from 'path';
 
 /**
  * Obtém o caminho base do projeto
- * Quando empacotado com pkg, usa process.cwd() (diretório de onde foi executado)
+ * Quando empacotado com pkg, usa o diretório do executável
  * Quando em desenvolvimento, usa __dirname relativo
  */
 export function getBasePath(): string {
@@ -14,10 +14,9 @@ export function getBasePath(): string {
     process.execPath.includes('snapshot');
     
   if (isPackaged) {
-    // Quando empacotado com pkg, process.execPath aponta para o snapshot interno
-    // Usamos process.cwd() que é o diretório de onde o executável foi chamado
-    // IMPORTANTE: Execute o .exe sempre da mesma pasta onde ele está localizado
-    return process.cwd();
+    // Quando empacotado, usar o diretório do executável
+    // Isso garante consistência independentemente de onde o .exe foi executado
+    return path.dirname(process.execPath);
   }
   // Em desenvolvimento, retorna a pasta backend
   return path.join(__dirname, '../..');
